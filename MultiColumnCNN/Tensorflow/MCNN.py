@@ -3,6 +3,7 @@ import matplotlib.image as mpimg
 from PIL import Image, ImageFile
 import numpy as np
 # import cv2
+import pandas as pd
 
 from matplotlib import pyplot as plt
 
@@ -80,6 +81,14 @@ if __name__ == "__main__":
 
     input_path= "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
     input_path_3channels = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
+    gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/1_5.csv"
+
+    den = pd.read_csv(gt_path).values
+    den = np.array(den)
+    print(np.sum(den))
+
+    plt.imshow(den)
+    plt.show()
 
     image = read_image_using_PIL(input_path_3channels)
     print(np.shape(image))
@@ -88,20 +97,20 @@ if __name__ == "__main__":
     # config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
 
-    with tf.Session() as sess:
-        # Initialize all variables
-        sess.run(tf.global_variables_initializer())
-        output = sess.run(ob1.column1_output, feed_dict={X: [image]})
-
-    print(np.shape(output))
-    output_1 = output[0,:,:,4]
-
-    # print(type(output))
-    img = np.array(output_1,dtype = np.uint8)
-
-    plt.imshow(img, interpolation='nearest')
-    plt.show()
-    # print(img.shape)
-    # # print(img)
-    # img = Image.fromarray(np.uint8(img), mode="RGB")
-    # img.show()
+    # with tf.Session() as sess:
+    #     # Initialize all variables
+    #     sess.run(tf.global_variables_initializer())
+    #     output = sess.run(ob1.column1_output, feed_dict={X: [image]})
+    #
+    # print(np.shape(output))
+    # output_1 = output[0,:,:,4]
+    #
+    # # print(type(output))
+    # img = np.array(output_1,dtype = np.uint8)
+    #
+    # plt.imshow(img, interpolation='nearest')
+    # plt.show()
+    # # print(img.shape)
+    # # # print(img)
+    # # img = Image.fromarray(np.uint8(img), mode="RGB")
+    # # img.show()

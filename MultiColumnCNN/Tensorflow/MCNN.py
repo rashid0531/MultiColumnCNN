@@ -79,19 +79,25 @@ if __name__ == "__main__":
     X = tf.placeholder(tf.float32, [1, 224, 224, 3])
     ob1 = MCNN(X)
 
-    input_path= "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
-    input_path_3channels = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
-    gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/1_5.csv"
+    # input_path= "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
+    # input_path_3channels = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
+    # gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/1_5.csv"
+
+    input_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
+    input_path_3channels = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
+    gt_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/52_8.csv"
+
 
     den = pd.read_csv(gt_path).values
     den = np.array(den)
     print(np.sum(den))
+    print(den.shape)
 
     plt.imshow(den)
     plt.show()
-
-    image = read_image_using_PIL(input_path_3channels)
-    print(np.shape(image))
+    #
+    # image = read_image_using_PIL(input_path_3channels)
+    # print(np.shape(image))
 
     # config = tf.ConfigProto()
     # config.gpu_options.per_process_gpu_memory_fraction = 0.4

@@ -44,7 +44,12 @@ def readcsv(input_csv):
     return decoded_csv
 
 
-def _parse_function(image_path,groundTruth_csvPath):
+def read_npy_file(image_name,item):
+    data = np.load(item.decode())
+    return image_name,data.astype(np.float32)
+
+
+def _parse_function(image_path,groundTruth_path):
 
     image_string = tf.read_file(image_path)
     image_decoded = tf.image.decode_jpeg(image_string, channels=1)
@@ -52,18 +57,10 @@ def _parse_function(image_path,groundTruth_csvPath):
     # image_decoded = tf.image.decode_jpeg(image_string,channels=3)
 
     # !!!!!!!!!!! Resizing maynot be necessary !!!!!!!!!!!
-    image_resized = tf.image.resize_images(image_decoded, [224, 224])
-    image = tf.cast(image_resized, tf.float32)
 
-    gt_string = tf.read_file(groundTruth_csvPath)
-    gt_image_decoded = tf.image.decode_jpeg(gt_string, channels=1)
+    image = tf.cast(image_decoded, tf.float32)
 
-    # !!!!!!!!!!! Resizing maynot be necessary !!!!!!!!!!!
-    gt_image_resized = tf.image.resize_images(gt_image_decoded, [224, 224])
-    gt = tf.cast(gt_image_resized, tf.float32)
-
-
-    return image,gt
+    return image,groundTruth_path
 
 
 if __name__ == "__main__":

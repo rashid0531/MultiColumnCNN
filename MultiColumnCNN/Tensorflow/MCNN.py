@@ -4,7 +4,7 @@ from PIL import Image, ImageFile
 import numpy as np
 # import cv2
 import pandas as pd
-
+import MultiColumnCNN.MultiColumnCNN.Tensorflow.config as config
 from matplotlib import pyplot as plt
 
 class MCNN():
@@ -13,22 +13,16 @@ class MCNN():
 
         # column1_design : a tuple that contains the parameters for each layer of CNN.
 
-        self.column1_design = {
+        self._column1_design = config.column1_design
+        self._column2_design = config.column2_design
+        self._column3_design = config.column3_design
+        self._final_layer_design = config.final_layer_design
 
-            # the parameters for each convolutional layer are arranged as feature_maps/filters,kernel/filter_size,stride
-            # and the parameters for each max pool layer are arranged as kernel size followed by strides.
-            'conv1' : [16,9,2],
-            'maxPool1':[2,1],
-            'conv2': [32,7,2],
-            'maxPool2': [2,1],
-            'conv3': [16,7,2],
-            'conv4': [8,7,2],
-
-        }
-
-        self.column1_output = self.Shallow(input_image,self.column1_design)
-        # self.column2_output
-        # self.column3_output
+        self.column1_output = self.Shallow(input_image,self._column1_design)
+        self.column2_output = self.Shallow(input_image,self._column2_design)
+        self.column3_output = self.Shallow(input_image,self._column3_design)
+        self.fusion = tf.concat([self.column1_output,self.column2_output,self.column3_output],axis = 3)
+        self.final_layer_output = self.final_layer(self.fusion,self._final_layer_design)
 
 
     def Shallow(self,input_image,properties):
@@ -63,13 +57,21 @@ class MCNN():
 
         return conv4
 
+    def final_layer(self,input,properties):
+
+        final_conv = tf.layers.conv2d(input, filters=properties['conv1'][0], kernel_size=properties['conv1'][1],
+                                 strides=[properties['conv1'][2], properties['conv1'][2]], padding="SAME",
+                                 activation=tf.nn.relu)
+
+        return final_conv
+
 
 def read_image_using_PIL(image):
     ImageFile.LOAD_TRUNCATED_IMAGES = True
     image = Image.open(image)
-    # image = image.resize((224,224))
+    image = image.resize((224,224))
     image = np.asarray(image, np.uint8)
-    print(np.sum(image))
+    # print(np.sum(image))
     # img = Image.fromarray(image)
     # img.show()
     return image
@@ -89,28 +91,25 @@ if __name__ == "__main__":
     # input_path_3channels = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
     # gt_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/52_8.csv"
 
-
-
-    den = pd.read_csv(gt_path).values
-    den = np.array(den)
-    print(np.sum(den))
-    print(den)
+    # den = pd.read_csv(gt_path).values
+    # den = np.array(den)
+    # print(np.sum(den))
+    # print(den)
 
     # plt.imshow(den)
     # plt.show()
     #
-    image = read_image_using_PIL("/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_density_maps/100_1.png")
+    image = read_image_using_PIL(input_path_3channels)
 
-    print(den.shape)
-
-    plt.imshow(den)
-    plt.show()
+    # print(den.shape)
     #
-    # image = read_image_using_PIL(input_path_3channels)
-    # print(np.shape(image))
-
-
-    print(image)
+    # plt.imshow(den)
+    # plt.show()
+    # #
+    # # image = read_image_using_PIL(input_path_3channels)
+    # # print(np.shape(image))
+    #
+    # print(image)
 
 
     # gt_string = tf.read_file(groundTruth_csvPath)
@@ -125,20 +124,9 @@ if __name__ == "__main__":
     # # config.gpu_options.per_process_gpu_memory_fraction = 0.4
     #
     #
-    # # with tf.Session() as sess:
-    # #     # Initialize all variables
-    # #     sess.run(tf.global_variables_initializer())
-    # #     output = sess.run(ob1.column1_output, feed_dict={X: [image]})
+    with tf.Session() as sess:
+        # Initialize all variables
+        sess.run(tf.global_variables_initializer())
+        output = sess.run(ob1.final_layer_output,feed_dict={X: [image]})
     # #
-    # # print(np.shape(output))
-    # # output_1 = output[0,:,:,4]
-    # #
-    # # # print(type(output))
-    # # img = np.array(output_1,dtype = np.uint8)
-    # #
-    # # plt.imshow(img, interpolation='nearest')
-    # # plt.show()
-    # # # print(img.shape)
-    # # # # print(img)
-    # # # img = Image.fromarray(np.uint8(img), mode="RGB")
-    # # # img.show()
+    print(np.shape(output))

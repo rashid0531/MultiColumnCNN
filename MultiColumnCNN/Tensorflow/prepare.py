@@ -4,6 +4,8 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 import io
+import MultiColumnCNN.MultiColumnCNN.Tensorflow.config as config
+import cv2
 
 def get_trainDataSet(image_path,gt_path):
 
@@ -45,20 +47,27 @@ def readcsv(input_csv):
 
 
 def read_npy_file(image_name,item):
+
+
+    # The ground truth density map needs to be downsampled because after beign processed through the MAX-POOL layers the input is downsized in half for each MAX-POOL layer.
     data = np.load(item.decode())
+    width =  int(config.input_image_width/4)
+    height = int(config.input_image_height/4)
+    data = cv2.resize(data, (width, height))
+    data = data * ((width * height) / (width * height))
+
+    # !!!!!!!!!!!!!!!! This reshaping doesn't need to be done if the density map is multichanneled. !!!!!!!!!!!!!!!!!!!!!!
+    data = np.reshape(data, [data.shape[1], data.shape[0], 1])
     return image_name,data.astype(np.float32)
 
 
 def _parse_function(image_path,groundTruth_path):
 
     image_string = tf.read_file(image_path)
-    image_decoded = tf.image.decode_jpeg(image_string, channels=1)
-
-    # image_decoded = tf.image.decode_jpeg(image_string,channels=3)
-
-    # !!!!!!!!!!! Resizing maynot be necessary !!!!!!!!!!!
-
-    image = tf.cast(image_decoded, tf.float32)
+    image_decoded = tf.image.decode_jpeg(image_string, channels=config.input_image_channels)
+    # Due to the variable size of input images, resizing was done to scale all images into a fix size.
+    image_resized = tf.image.resize_images(image_decoded, [config.input_image_width, config.input_image_height])
+    image = tf.cast(image_resized, tf.float32)
 
     return image,groundTruth_path
 
@@ -73,4 +82,6 @@ if __name__ == "__main__":
 
     train_gt_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den"
 
-    get_trainDataSet(train_path,train_gt_path)
+    np_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/temp/train_density_maps/100_1.npy"
+
+    read_npy_file(train_gt_path,np_path)

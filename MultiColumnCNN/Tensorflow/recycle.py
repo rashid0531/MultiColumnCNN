@@ -15,3 +15,16 @@
 #     np.savetxt("foo.csv", data, delimiter=",")
 #
 #     return image_name,data.astype(np.float32)
+
+import tensorflow as tf
+
+x = tf.constant([[1, 1, 1], [1, 1, 1]])
+p = tf.reduce_sum(x)  # 6
+tf.reduce_sum(x, 0)  # [2, 2, 2]
+tf.reduce_sum(x, 1)  # [3, 3]
+tf.reduce_sum(x, 1, keepdims=True)  # [[3], [3]]
+tf.reduce_sum(x, [0, 1])  # 6
+
+with tf.Session() as sess:
+    out = sess.run(p)
+    print(tf.rank(out))

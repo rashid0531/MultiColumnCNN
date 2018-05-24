@@ -2,7 +2,7 @@ import tensorflow as tf
 import matplotlib.image as mpimg
 from PIL import Image, ImageFile
 import numpy as np
-# import cv2
+import cv2
 import pandas as pd
 import MultiColumnCNN.MultiColumnCNN.Tensorflow.config as config
 from matplotlib import pyplot as plt
@@ -66,6 +66,20 @@ class MCNN():
         return final_conv
 
 
+def read_npy_file(item):
+
+
+    # The ground truth density map needs to be downsampled because after beign processed through the MAX-POOL layers the input is downsized in half for each MAX-POOL layer.
+    data = np.load(item)
+    width =  int(config.input_image_width/4)
+    height = int(config.input_image_height/4)
+    data = cv2.resize(data, (width, height))
+    data = data * ((width * height) / (width * height))
+
+    # !!!!!!!!!!!!!!!! This reshaping doesn't need to be done if the density map is multichanneled. !!!!!!!!!!!!!!!!!!!!!!
+    # data = np.reshape(data, [data.shape[1], data.shape[0], 1])
+    return data.astype(np.float32)
+
 def read_image_using_PIL(image):
     ImageFile.LOAD_TRUNCATED_IMAGES = True
     image = Image.open(image)
@@ -85,48 +99,56 @@ if __name__ == "__main__":
 
     input_path= "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
     input_path_3channels = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
-    gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/100_1.csv"
+    gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/100_9.csv"
+    np_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/temp/train_density_maps/100_9.npy"
 
     # input_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train/1_9.jpg"
     # input_path_3channels = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/original/shanghaitech/part_A_final/train_data/images/IMG_1.jpg"
     # gt_path = "/u1/rashid/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_den/52_8.csv"
 
-    # den = pd.read_csv(gt_path).values
-    # den = np.array(den)
-    # print(np.sum(den))
-    # print(den)
+    den = pd.read_csv(gt_path).values
+    den = np.array(den)
+    print(np.sum(den))
+    print(den.shape)
 
-    # plt.imshow(den)
-    # plt.show()
-    #
-    image = read_image_using_PIL(input_path_3channels)
+    yen  = read_npy_file(np_path)
+    print(np.sum(yen))
+    print(yen)
 
-    # print(den.shape)
-    #
-    # plt.imshow(den)
-    # plt.show()
+    # # plt.imshow(den)
+    # # plt.show()
     # #
-    # # image = read_image_using_PIL(input_path_3channels)
-    # # print(np.shape(image))
+    # image = read_image_using_PIL(input_path_3channels)
     #
-    # print(image)
-
-
-    # gt_string = tf.read_file(groundTruth_csvPath)
-    # gt_image_decoded = tf.image.decode_jpeg(gt_string, channels=1)
-    #
-    # # !!!!!!!!!!! Resizing maynot be necessary !!!!!!!!!!!
-    # # gt_image_resized = tf.image.resize_images(gt_image_decoded, [160, 256])
-    # gt = tf.cast(gt_image_decoded, tf.float32)
-    # # print(np.shape(image))
-    #
-    # # config = tf.ConfigProto()
-    # # config.gpu_options.per_process_gpu_memory_fraction = 0.4
-    #
-    #
-    with tf.Session() as sess:
-        # Initialize all variables
-        sess.run(tf.global_variables_initializer())
-        output = sess.run(ob1.final_layer_output,feed_dict={X: [image]})
+    # # print(den.shape)
     # #
-    print(np.shape(output))
+    # # plt.imshow(den)
+    # # plt.show()
+    # # #
+    # # # image = read_image_using_PIL(input_path_3channels)
+    # # # print(np.shape(image))
+    # #
+    # # print(image)
+    #
+    #
+    # # gt_string = tf.read_file(groundTruth_csvPath)
+    # # gt_image_decoded = tf.image.decode_jpeg(gt_string, channels=1)
+    # #
+    # # # !!!!!!!!!!! Resizing maynot be necessary !!!!!!!!!!!
+    # # # gt_image_resized = tf.image.resize_images(gt_image_decoded, [160, 256])
+    # # gt = tf.cast(gt_image_decoded, tf.float32)
+    # # # print(np.shape(image))
+    # #
+    # # # config = tf.ConfigProto()
+    # # # config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    # #
+    # #
+    #
+    #
+    #
+    # with tf.Session() as sess:
+    #     # Initialize all variables
+    #     sess.run(tf.global_variables_initializer())
+    #     output = sess.run(ob1.final_layer_output,feed_dict={X: [image]})
+    # # #
+    # print(np.shape(output))

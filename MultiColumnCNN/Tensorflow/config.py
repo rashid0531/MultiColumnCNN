@@ -1,3 +1,6 @@
+
+
+
 input_image_width = 224
 input_image_height = 224
 
@@ -57,3 +60,4 @@ final_layer_design = {
             'conv1' : [1,1,1]
 
         }
+

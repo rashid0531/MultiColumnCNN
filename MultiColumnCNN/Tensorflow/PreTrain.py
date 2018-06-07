@@ -9,8 +9,8 @@ import MultiColumnCNN.MultiColumnCNN.Tensorflow.config as config
 from datetime import datetime
 
 ############################### Parameters #############################################
-batch_size = 25
-learning_rate = 0.00001
+batch_size = 30
+learning_rate = 0.000001
 
 
 ############################### Input Paths ############################################
@@ -18,6 +18,10 @@ learning_rate = 0.00001
 train_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train"
 
 train_gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_density_maps"
+
+test_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train"
+
+test_gt_path = "/home/mohammed/Projects/CrowdCount/crowdcount-mcnn/data/formatted_trainval/shanghaitech_part_A_patches_9/train_density_maps"
 
 log_path = "/home/mohammed/tf_logs"
 
@@ -91,7 +95,6 @@ with tf.name_scope("loss"):
 
     # Evaluate model
 
-
     sum_of_Y = tf.reduce_sum(Y,axis=[1,2,3],keepdims=True)
 
     sum_of_predicted_density_map = tf.reduce_sum(predicted_density_map,axis=[1,2,3],keepdims=True)
@@ -109,8 +112,8 @@ currenttime = datetime.utcnow().strftime("%Y%m%d%H%M%S")
 logdir = "{}/run-{}/".format(root_log_dir_for_tflog,currenttime)
 file_writer = tf.summary.FileWriter(logdir,tf.get_default_graph())
 
-# summary writter - Cost.
-cost_summary_train = tf.summary.scalar("Training loss", cost)
+# summary writter - mse.
+cost_summary_train = tf.summary.scalar("Training loss", mse)
 cost_summary_test = tf.summary.scalar("Testing loss", cost)
 
 ############################### Graph execution ##########################################
@@ -124,7 +127,7 @@ with tf.Session() as sess:
     # output = sess.run([sum_of_Y,sum_of_predicted_density_map], feed_dict={X: images, Y: gt})
     # print(output[0].shape,output[1].shape)
 
-    while (epoch < 39):
+    while (epoch < 50):
 
         print("{} Epoch number: {}".format(datetime.now(), epoch + 1))
 
@@ -143,5 +146,8 @@ with tf.Session() as sess:
 
                 file_writer.add_summary(loss_summary_train, epoch*num_steps + step)
 
-
         epoch += 1
+
+
+
+file_writer.close()

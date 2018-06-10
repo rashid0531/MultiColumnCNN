@@ -7,9 +7,10 @@ import MultiColumnCNN.MultiColumnCNN.Tensorflow.MCNN as models
 from matplotlib import pyplot as plt
 import MultiColumnCNN.MultiColumnCNN.Tensorflow.config as config
 from datetime import datetime
+from tensorflow.python.client import timeline
 
 ############################### Parameters #############################################
-batch_size = 30
+batch_size = 3
 learning_rate = 0.000001
 
 
@@ -86,7 +87,12 @@ with tf.name_scope("loss"):
 
     # Designing mse as cost function.
 
-    cost = tf.losses.mean_squared_error(Y, predicted_density_map)
+    # cost = tf.losses.mean_squared_error(Y, predicted_density_map)
+
+    cost = tf.reduce_mean((tf.reduce_sum(tf.square(tf.subtract(Y, predicted_density_map)),axis=[1,2,3],keepdims=True)))
+    # cost = tf.reduce_mean(cost1)
+
+
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     train_op = optimizer.minimize(cost)
 
@@ -127,7 +133,7 @@ with tf.Session() as sess:
     # output = sess.run([sum_of_Y,sum_of_predicted_density_map], feed_dict={X: images, Y: gt})
     # print(output[0].shape,output[1].shape)
 
-    while (epoch < 50):
+    while (epoch < 5):
 
         print("{} Epoch number: {}".format(datetime.now(), epoch + 1))
 
@@ -139,10 +145,12 @@ with tf.Session() as sess:
             if (step % display_step == 0):
 
                 # Collecting Trainset MSE loss.
-                loss, loss_summary_train = sess.run([mse, cost_summary_train],
+                loss, loss_summary_train = sess.run([cost, cost_summary_train],
                                                   feed_dict={X: images,Y:gt})
 
-                print("training loss(MSE) over batch: {}".format(loss))
+                # print("training loss(MSE) over batch: {}".format(loss))
+
+                print(np.array(loss))
 
                 file_writer.add_summary(loss_summary_train, epoch*num_steps + step)
 

@@ -1,6 +1,7 @@
 import tensorflow as tf
 import MultiColumnCNN.MultiColumnCNN.Tensorflow.prepare as prepare
 import MultiColumnCNN.MultiColumnCNN.Tensorflow.MCNN as model
+from tensorflow.python.client import timeline
 
 ############################### Parameters #############################################
 batch_size = 30
@@ -59,14 +60,26 @@ def do_training(update_op, loss):
     config = tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)
 
     with tf.Session(config=config) as sess:
+
         sess.run(tf.global_variables_initializer())
+
+        # run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+        # run_metadata = tf.RunMetadata()
+
         try:
             step = 0
             while True:
                 _, loss_value = sess.run((update_op, loss))
-                if step % 100 == 0:
+                # _, loss_value = sess.run([update_op, loss],options=run_options, run_metadata=run_metadata)
+                if step % 10 == 0:
                     print('Step {} with loss {}'.format(step, loss_value))
+                    # profiling
+                    # tl = timeline.Timeline(run_metadata.step_stats)
+                    # ctf = tl.generate_chrome_trace_format()
+                    # with open('timeline.json', 'w') as f:
+                    #     f.write(ctf)
                 step += 1
+
         except tf.errors.OutOfRangeError:
             # we're through the dataset
             pass
@@ -171,6 +184,15 @@ def create_parallel_optimization(model_fn, input_fn, optimizer, controller="/cpu
 
             # After the first iteration, we want to reuse the variables.
             outer_scope.reuse_variables()
+
+            # Profiling
+            run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+            run_metadata = tf.RunMetadata()
+
+            tl = timeline.Timeline(run_metadata.step_stats)
+            ctf = tl.generate_chrome_trace_format()
+            with open('timeline.json', 'a') as f:
+                f.write(ctf)
 
     # Apply the gradients on the controlling device
     with tf.name_scope("apply_gradients"), tf.device(controller):

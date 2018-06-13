@@ -145,12 +145,12 @@ with tf.Session() as sess:
             if (step % display_step == 0):
 
                 # Collecting Trainset MSE loss.
-                loss, loss_summary_train = sess.run([cost, cost_summary_train],
+                loss, loss_summary_train = sess.run([mse, cost_summary_train],
                                                   feed_dict={X: images,Y:gt})
 
-                # print("training loss(MSE) over batch: {}".format(loss))
+                print("training loss(MSE) over batch: {}".format(loss))
 
-                print(np.array(loss))
+                # print(np.array(loss))
 
                 file_writer.add_summary(loss_summary_train, epoch*num_steps + step)
 
